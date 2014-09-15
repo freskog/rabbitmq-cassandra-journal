@@ -1,8 +1,8 @@
-package com.journal.poc.consumer
+package com.journal.poc.amqp
 
 import akka.actor.{ActorRef, Stash, Props, Actor}
 import com.journal.poc.{JournalMessage, AcknowledgeBatch, WriterInitialized}
-import com.journal.poc.consumer.AmqpConsumer.MessageReceived
+import com.journal.poc.amqp.AmqpConsumer.MessageReceived
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Envelope, ShutdownSignalException, Consumer, ConnectionFactory}
 
@@ -10,7 +10,7 @@ object AmqpConsumer {
 
   case class MessageReceived(correlationId:String, messageId:String, ackTag:Long, payload:Array[Byte])
 
-  def props(cf:ConnectionFactory):Props = Props(new AmqpConsumer(cf))
+  def props(writer:ActorRef, cf:ConnectionFactory):Props = Props(new AmqpConsumer(writer, cf))
 }
 
 class AmqpConsumer(writer:ActorRef, cf:ConnectionFactory) extends Actor with Consumer {
