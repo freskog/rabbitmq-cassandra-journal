@@ -30,12 +30,16 @@ class CassandraWriter(session:Session) extends Actor with Stash {
   }
 
   def writing(consumer:ActorRef, lastReceivedAckTag:Long, statements:List[Statement]):Receive = {
-    case RegisterConsumer => becomeWriting(sender())
+    case RegisterConsumer =>
+      becomeWriting(sender())
+
     case SendBatch =>
       acknowledgeBatch(lastReceivedAckTag, statements, consumer)
       context.become(writing(consumer, lastReceivedAckTag, Nil))
+
     case JournalMessage(correlationId, messageId, ackTag, payload) =>
-      context.become(writing(consumer, ackTag, insertStatementFor(correlationId, messageId, payload) :: statements))
+      val statement = insertStatementFor(correlationId, messageId, payload)
+      context.become(writing(consumer, ackTag, statement :: statements))
   }
 
   def insertStatementFor(correlationId:String, messageId:UUID, payload:Array[Byte]):Statement = {

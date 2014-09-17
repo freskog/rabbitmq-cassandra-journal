@@ -24,6 +24,7 @@ class AmqpConsumer(writer:ActorRef, cf:ConnectionFactory) extends Actor with Con
     case AcknowledgeBatch(ackTag) =>
       log.debug(s"performing BatchAck to rabbit with deliveryTag = $ackTag")
       channel.basicAck(ackTag, true)
+
     case MessageReceived(correlationId, messageId, ackTag, payload) =>
       log.debug(s"message received with deliveryTag = $ackTag")
       writer ! JournalMessage(correlationId, messageId, ackTag, payload)
@@ -34,8 +35,8 @@ class AmqpConsumer(writer:ActorRef, cf:ConnectionFactory) extends Actor with Con
   override def handleCancel(p1: String): Unit = throw new IllegalStateException("Consumer cancelled!")
   override def handleCancelOk(p1: String): Unit = {}
   override def handleShutdownSignal(p1: String, p2: ShutdownSignalException): Unit = throw new IllegalStateException("Consumer shutdown!")
-  override def handleDelivery(p1: String, p2: Envelope, p3: BasicProperties, p4: Array[Byte]): Unit = {
-    self ! MessageReceived(p3.getCorrelationId, UUID.fromString(p3.getMessageId), p2.getDeliveryTag, p4)
+  override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, payload: Array[Byte]): Unit = {
+    self ! MessageReceived(properties.getCorrelationId, UUID.fromString(properties.getMessageId), envelope.getDeliveryTag, payload)
   }
 
   cf.setAutomaticRecoveryEnabled(false)

@@ -18,8 +18,6 @@ class AcceptanceTestFixture extends DiagrammedAssertions {
   val cluster = Cluster.builder().addContactPoint("localhost").build()
   val session = cluster.connect("journal")
 
-
-
   private val messageGenerator = Iterator.from( 1 ).map { i => AmqpMessage(convertToCorrelationId(i), UUIDs.startOf(1410964472794L+i), convertIntToByteArray(i))}
 
   private def convertToCorrelationId(i: Int): String = {
@@ -67,5 +65,14 @@ class AcceptanceTestFixture extends DiagrammedAssertions {
 
     assert(actualCountPerRow.reduce(_+_) == numberOfMessages, "Not all message found in journal!")
   }
+
+  session.execute("drop table journal.inbound")
+  session.execute("""create table if not exists journal.inbound(
+                    |    correlationId text,
+                    |    messageId timeuuid,
+                    |    payload text,
+                    |    saved_at timestamp,
+                    |    PRIMARY KEY(correlationId, messageId)
+                    |    ) WITH CLUSTERING ORDER BY (messageId ASC)""".stripMargin)
 
 }

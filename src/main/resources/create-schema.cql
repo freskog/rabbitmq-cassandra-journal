@@ -1,8 +1,12 @@
 
+
+
 create keyspace if not exists journal WITH replication = {
   'class': 'SimpleStrategy',
   'replication_factor': '1'
 };
+
+drop table if exists journal.inbound;
 
 create table if not exists journal.inbound(
     correlationId text,
