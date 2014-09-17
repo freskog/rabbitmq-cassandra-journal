@@ -17,7 +17,7 @@ object JournalGuardian {
 class JournalGuardian(cf:ConnectionFactory, session:Session) extends Actor {
 
   val writer    = context.actorOf(CassandraWriter.props(session), "writer")
-  val consumer  = AmqpConsumer.props(writer, cf)
+  val consumer  = context.actorOf(AmqpConsumer.props(writer, cf), "consumer")
 
   override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 1.minute) {
     case _: Exception => Restart

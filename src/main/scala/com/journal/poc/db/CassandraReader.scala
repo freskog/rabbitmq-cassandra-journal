@@ -2,12 +2,16 @@ package com.journal.poc.db
 
 import java.util.UUID
 
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
 import com.datastax.driver.core.querybuilder.QueryBuilder
 import com.datastax.driver.core.{ConsistencyLevel, Session}
 import com.journal.poc.{ReadRowUntil, ReplayedMessage}
 
 import scala.collection.JavaConversions._
+
+object CassandraReader {
+  def props(session:Session):Props = Props(new CassandraReader(session))
+}
 
 class CassandraReader(session:Session) extends Actor {
 

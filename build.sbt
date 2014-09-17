@@ -8,6 +8,7 @@ libraryDependencies ++= Seq(
   "com.rabbitmq" % "amqp-client" % "3.3.5",
   "com.datastax.cassandra" % "cassandra-driver-core" % "2.1.0",
   "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.3.6",
   "com.typesafe" % "config" % "1.2.1",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
   "org.cassandraunit" % "cassandra-unit" % "2.0.2.1" % "test",
